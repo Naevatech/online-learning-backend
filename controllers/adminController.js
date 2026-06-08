@@ -38,7 +38,13 @@ export const register = async (req, res) => {
                         <p>Welcome to my app built. Your account has been created with email id" ${email}</p>
                     </div>`
         }
-        await transporter.sendMail(mailOptions);
+
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (err) {
+            console.error("Error sending email:", err);
+        }
+        // await transporter.sendMail(mailOptions);
         // try {
         // } catch (error) {
         //     return res.json({success:true, message:error.message})
@@ -106,18 +112,18 @@ export const logout = async (req, res) => {
 }
 
 // Not gotten yet
-export const isAuthenticated = async(req, res)=> {
-    try { 
-        return res.json({success:true});
-    } catch (error) { 
-        return res.json({success:false, message:"There is an error"})
+export const isAuthenticated = async (req, res) => {
+    try {
+        return res.json({ success: true });
+    } catch (error) {
+        return res.json({ success: false, message: "There is an error" })
     }
 }
 
-export const uploadImage =  async (req, res)=> {
+export const uploadImage = async (req, res) => {
     await imageupload(req.body.image)
-    .then((url)=>res.send(url))
-    .catch((err)=>res.status(500).send(err))
+        .then((url) => res.send(url))
+        .catch((err) => res.status(500).send(err))
 }
 
 
@@ -132,18 +138,18 @@ export const newCourse = async (req, res) => {
         no_of_files,
         backdropURL,
         videos: [],
-            
+
     };
 
     try {
-        const newCourseourse = await adminModel.findByIdAndUpdate("68381d1aaf39fe6c8e9c7c54", 
-            {$push:{course:newCourse1}}, 
-            {new:true}
+        const newCourseourse = await adminModel.findByIdAndUpdate("68381d1aaf39fe6c8e9c7c54",
+            { $push: { course: newCourse1 } },
+            { new: true }
         )
-        if(newCourseourse){
-            return res.json({success:true, message:"New Course added successfully"})
+        if (newCourseourse) {
+            return res.json({ success: true, message: "New Course added successfully" })
         }
-    
+
     } catch (error) {
         return res.json({ success: false, message: error.message })
     }
@@ -169,9 +175,9 @@ export const newCourse = async (req, res) => {
 //         if(updateCourseFile){
 //             return res.json({success:true, message:"New Course updated successfully"})
 //         }
-        
 
-    
+
+
 //     } catch (error) {
 //         return res.json({ success: false, message: error.message })
 //     }
@@ -199,11 +205,11 @@ export const addCourseFiles = async (req, res) => {
             // course._id.equals("68384c2d5f8e374be6ac06da")
         );
 
-        
+
         if (!targetCourse) {
             return res.json({ success: false, message: "Course not found" });
         }
-        
+
         console.log(targetCourse.videos)
         // Push new file into videos array
         targetCourse.videos.push(courseFiles);
@@ -222,4 +228,22 @@ export const addCourseFiles = async (req, res) => {
     }
 };
 
+//get each course created by id
+export const getSingleCourse = async (req, res) => {
+    const { courseID } = req.params;
+    try {
+        const admin = await adminModel.findById("courseID");
+        if (!admin) {
+            return res.json({ success: false, message: "Admin not found" });
+        }
+        const targetCourse = admin.course.find(course => course._id.toString() === courseID);
+        if (!targetCourse) {
+            return res.json({ success: false, message: "Course not found" });
+        }
 
+        return res.json({ success: true, course: targetCourse });
+    } catch (error) {
+        console.error("Error fetching single course:", error);
+        return res.json({ success: false, message: error.message });
+    }
+};

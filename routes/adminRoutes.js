@@ -7,5 +7,6 @@ adminRouter.post("/login", login);
 adminRouter.post("/logout", logout);
 adminRouter.post("/createcourse", newCourse)
 adminRouter.post("/addfiles", addCourseFiles)
+
 // authRouter.get("/is-auth", userAuth, isAuthenticated)
 export default adminRouter 

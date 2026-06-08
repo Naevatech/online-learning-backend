@@ -7,21 +7,30 @@ import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import courseRouter from "./routes/courseRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
+
 const app = express();
-const port = process.env.PORT || 4000;
-const allowedOrigin = ['http://localhost:5173']
-connectDB()
+const port = process.env.PORT || 5000;
 
+connectDB();
+
+// 1. CORS CONFIG (Must be above routes)
+app.use(cors({
+    origin: ['http://localhost:4000'], 
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// 2. MIDDLEWARES
 app.use(express.json({ limit: '50mb'}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({origin:allowedOrigin, credentials:true}))
 
-// app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
-//API ENDPOINT
-app.get("/", (req, res)=>res.send("API IS now WORKING"))
-app.use("/api/auth", authRouter)
-app.use("/api/user", userRouter)
-app.use("/api/course", courseRouter)
+// 3. API ENDPOINTS
+app.get("/", (req, res) => res.send("API IS WORKING"));
+app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
+app.use("/api/course", courseRouter);
+app.use("/api/admin", adminRouter);
 
-app.use("/api/admin", adminRouter)
-app.listen(port, ()=>console.log(`server started on PORT:${port}`))
+app.listen(port, () => console.log(`Server started on PORT: ${port}`));

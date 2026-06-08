@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken"
 import userModel from "../models/userModel.js"
 import transporter from "../config/nodemailer.js"
 import userAuth from "../middleware/userAuth.js";
+// import userAuth from "../middleware/userAuth.js";
+
 // name, email, username, gender, password
 export const register = async (req, res) => {
     const { name, email, username, gender, password } = req.body
@@ -26,7 +28,7 @@ export const register = async (req, res) => {
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
-
+        
         //Send email
         const mailOptions = {
             from: `"Magic Elves" ${process.env.SENDER_EMAIL}`,
@@ -40,10 +42,6 @@ export const register = async (req, res) => {
         }
 
         await transporter.sendMail(mailOptions);
-        // try {
-        // } catch (error) {
-        //     return res.json({success:true, message:error.message})
-        // }
 
         return res.json({ success: true, message: "user succesfully registered" })
 
@@ -94,17 +92,20 @@ export const login = async (req, res) => {
 
 
 export const logout = async (req, res) => {
-    try {
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
-        })
+        try {
 
-        return res.json({ success: true, message: "user logged out" })
-    } catch (error) {
-        return res.json({ success: false, message: error.message })
-    }
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
+            })
+
+            return res.json({ success: true, message: "user logged out" })
+        } catch (error) {
+            return res.json({ success: false, message: error.message })
+        }
+    
+
 }
 
 export const sendVerifyOtp = async (req, res) => {
@@ -163,10 +164,10 @@ export const sendVerifyOtp = async (req, res) => {
 };
 
 export const verifyEmail = async (req, res) => {
-    const {userId} = req
-    const {otp} = req.body;
+    const { userId } = req
+    const { otp } = req.body;
 
-    console.log({"userID":userId, otp})
+    console.log({ "userID": userId, otp })
     console.log(userId)
     if (!userId || !otp) {
         return res.json({ success: false, message: "Missing details" })
@@ -181,7 +182,7 @@ export const verifyEmail = async (req, res) => {
         }
 
         if (user.verifyOtpExpireAt < Date.now()) {
-            return res.json({success: false, message: "OTP expired" })
+            return res.json({ success: false, message: "OTP expired" })
         }
 
         user.isAccountVerified = true
@@ -196,25 +197,25 @@ export const verifyEmail = async (req, res) => {
 }
 
 // Not gotten yet
-export const isAuthenticated = async(req, res)=> {
-    try { 
-        return res.json({success:true});
-    } catch (error) { 
-        return res.json({success:false, message:"There is an error"})
+export const isAuthenticated = async (req, res) => {
+    try {
+        return res.json({ success: true });
+    } catch (error) {
+        return res.json({ success: false, message: "There is an error" })
     }
 }
 
 //Send password reset OTP
-export const sendResetOtp = async(req, res)=> {
-    const {email} = req.body;
+export const sendResetOtp = async (req, res) => {
+    const { email } = req.body;
     if (!email) {
-        return res.json({success:false, message:"Email is required"})  
+        return res.json({ success: false, message: "Email is required" })
     }
 
     try {
-        const user = await userModel.findOne({email})
+        const user = await userModel.findOne({ email })
         if (!user) {
-            return res.json({success:false, message:"user not found"})
+            return res.json({ success: false, message: "user not found" })
         }
 
         const otp = String(Math.floor(100000 + Math.random() * 900000))
@@ -241,17 +242,17 @@ export const sendResetOtp = async(req, res)=> {
     }
 }
 
-export const resetPassword = async(req, res) => {
-    const {email, otp, newPassword} = req.body
+export const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body
     console.log(email)
     if (!email || !otp || !newPassword) {
         return res.json({ success: false, message: "Email, OTP new password are required" })
     }
 
     try {
-        const user = await userModel.findOne({email});
+        const user = await userModel.findOne({ email });
         if (!user) {
-            return res.json({success:false, message:"user not found"})
+            return res.json({ success: false, message: "user not found" })
         }
 
         if (user.resetOtp === "" || user.resetOtp !== otp) {
@@ -259,7 +260,7 @@ export const resetPassword = async(req, res) => {
         }
 
         if (user.resetOtpExpireAt < Date.now()) {
-            return res.json({success: false, message: "OTP expired" })
+            return res.json({ success: false, message: "OTP expired" })
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -267,7 +268,7 @@ export const resetPassword = async(req, res) => {
         user.resetOtp = "";
         user.resetOtpExpireAt = 0;
         await user.save();
- 
+
         return res.json({ success: true, message: "Your password has been reset successfullys" })
     } catch (error) {
         return res.json({ success: false, message: error.message })
