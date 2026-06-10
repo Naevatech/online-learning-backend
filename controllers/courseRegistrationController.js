@@ -4,7 +4,15 @@ import Stripe from "stripe";
 import userModel from "../models/userModel.js";
 import userAuth from "../middleware/userAuth.js";
 
-const stripe = new Stripe(process.env.STRIPE_KEY);
+const getStripe = () => {
+    const stripeSecretKey = process.env.STRIPE_KEY || process.env.STRIPE_SECRET_KEY;
+
+    if (!stripeSecretKey) {
+        throw new Error("Missing Stripe secret key. Set STRIPE_KEY or STRIPE_SECRET_KEY in your environment.");
+    }
+
+    return new Stripe(stripeSecretKey);
+};
 
 
 export const newCourse = async (req, res) => {
@@ -105,6 +113,7 @@ export const checkout = async (req, res) => {
     console.log("Checkout request received with data:", { name, amount, courseId, userId });
 
     try {
+        const stripe = getStripe();
         const user = await userModel.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -228,6 +237,7 @@ export const verifyPayment = async (req, res) => {
     console.log("Received data:", { sessionId, courseId, userId });
 
     try {
+        const stripe = getStripe();
         // Retrieve the session from Stripe to check status
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 

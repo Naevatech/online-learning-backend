@@ -14,9 +14,11 @@ const port = process.env.PORT || 5000;
 
 connectDB();
 
+const allowedOrigins = [process.env.YOUR_DOMAIN].filter(Boolean);
+
 // 1. CORS CONFIG (Must be above routes)
 app.use(cors({
-    origin: ['process.env.YOUR_DOMAIN'], 
+    origin: allowedOrigins, 
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
