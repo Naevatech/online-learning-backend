@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
+import { pathToFileURL } from "url";
 import connectDB from "./config/mongodb.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
@@ -33,4 +34,10 @@ app.use("/api/user", userRouter);
 app.use("/api/course", courseRouter);
 app.use("/api/admin", adminRouter);
 
-app.listen(port, () => console.log(`Server started on PORT: ${port}`));
+const isDirectRun = process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+
+if (isDirectRun && !process.env.VERCEL) {
+    app.listen(port, () => console.log(`Server started on PORT: ${port}`));
+}
+
+export default app;
