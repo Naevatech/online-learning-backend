@@ -17,15 +17,24 @@ connectDB();
 const allowedOrigins = [process.env.YOUR_DOMAIN].filter(Boolean);
 
 // 1. CORS CONFIG (Must be above routes)
-app.use(cors({
-    origin: allowedOrigins, 
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// app.use(cors({
+//     origin: allowedOrigins,
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//     allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+
+app.use(
+    cors({
+        origin: "https://online-learning-beige.vercel.app",
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+    })
+);
 
 // 2. MIDDLEWARES
-app.use(express.json({ limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

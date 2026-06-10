@@ -5,6 +5,13 @@ import transporter from "../config/nodemailer.js"
 import userAuth from "../middleware/userAuth.js";
 // import userAuth from "../middleware/userAuth.js";
 
+const cookieOptions = {
+    httpOnly: true,
+    secure: true, // Required for SameSite=None
+    sameSite: "none", // Required for cross-origin cookies
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 // name, email, username, gender, password
 export const register = async (req, res) => {
     const { name, email, username, gender, password } = req.body
@@ -22,13 +29,14 @@ export const register = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
-        
+        // res.cookie("token", token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === 'production',
+        //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
+        //     maxAge: 7 * 24 * 60 * 60 * 1000
+        // })
+        res.cookie("token", token, cookieOptions);
+
         //Send email
         const mailOptions = {
             from: `"Magic Elves" ${process.env.SENDER_EMAIL}`,
@@ -73,12 +81,13 @@ export const login = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+        // res.cookie("token", token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === 'production',
+        //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
+        //     maxAge: 7 * 24 * 60 * 60 * 1000
+        // })
+        res.cookie("token", token, cookieOptions);
 
         return res.json({ success: true })
 
@@ -92,19 +101,24 @@ export const login = async (req, res) => {
 
 
 export const logout = async (req, res) => {
-        try {
+    try {
 
-            res.clearCookie("token", {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
-            })
+        // clearCookie("token", {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === 'production',
+        //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
+        // })
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
 
-            return res.json({ success: true, message: "user logged out" })
-        } catch (error) {
-            return res.json({ success: false, message: error.message })
-        }
-    
+        return res.json({ success: true, message: "user logged out" })
+    } catch (error) {
+        return res.json({ success: false, message: error.message })
+    }
+
 
 }
 
