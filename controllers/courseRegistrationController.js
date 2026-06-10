@@ -16,8 +16,8 @@ const getStripe = () => {
 
 
 export const newCourse = async (req, res) => {
-    const { title, description, pictureThumbnail } = req.body
-    if (!title || !description || !pictureThumbnail) {
+    const { title, description, pictureThumbnail, price } = req.body
+    if (!title || !description || !pictureThumbnail || price === undefined) {
         return res.json({ success: false, message: "Missing details" })
     }
 
@@ -26,7 +26,7 @@ export const newCourse = async (req, res) => {
         if (existingCourse) {
             return res.json({ success: false, message: "Course alreafy exist" })
         }
-        const course = new courseModel({ title, description, pictureThumbnail })
+        const course = new courseModel({ title, description, pictureThumbnail, price })
         await course.save()
         return res.json({ success: true, message: "Course created successfully" })
     } catch (error) {
